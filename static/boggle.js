@@ -5,6 +5,7 @@ const $form = $("#newWordForm");
 const $wordInput = $("#wordInput");
 const $message = $(".msg");
 const $table = $("table");
+const $gameScore = $("#gameScore");
 
 let gameId;
 
@@ -47,8 +48,8 @@ async function handleWordSubmit(evt) {
   const word = $wordInput.val();
   $wordInput.val("");
 
-  const { result } = await scoreWord(gameId, word)
-  displayScoredWord(result, word)
+  const { result, word_score, game_score } = await scoreWord(gameId, word)
+  displayScoredWord(result, word, word_score, game_score);
 }
 
 /**
@@ -68,10 +69,11 @@ async function scoreWord(gameId, word){
 /** Takes result of API call and word,
  * displays result in DOM
  */
-function displayScoredWord(result, word){
+function displayScoredWord(result, word, wordScore, gameScore){
 
   if (result === "ok") {
-    $("<li>").text(word).appendTo($playedWords);
+    $("<li>").text(`${word}: ${wordScore}`).appendTo($playedWords);
+    $gameScore.text(`Game score: ${gameScore}`);
   } else if (result === "not-word") {
     $message.text(`${word} is not a valid word!`);
   } else {
