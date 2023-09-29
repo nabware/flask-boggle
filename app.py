@@ -34,7 +34,13 @@ def score_word():
     """Takes game_id and a word, checks if word is legal, returns a json object
         with the result
     """
-    game_id, word = request.json
+
+    game_id = request.json.get("game_id")
+    word = request.json.get("word")
+
+    if not (game_id in games):
+        return jsonify(result="Game not found")
+
     game = games[game_id]
 
     if not game.is_word_in_word_list(word):
@@ -42,6 +48,8 @@ def score_word():
 
     if not game.check_word_on_board(word):
         return jsonify(result="not-on-board")
+
+    _score = game.play_and_score_word(word)
 
     return jsonify(result="ok")
 

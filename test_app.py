@@ -32,7 +32,6 @@ class BoggleAppTestCase(TestCase):
         """Test starting a new game."""
 
         with app.test_client() as client:
-            ...
             # write a test for this route
             response = client.post('/api/new-game')
             json = response.get_json()
@@ -41,3 +40,23 @@ class BoggleAppTestCase(TestCase):
             self.assertIsInstance(json['game_id'], str)
             self.assertIsInstance(json['board'], list)
             self.assertIn(json['game_id'], games)
+
+    def test_api_score_word(self):
+        """Test scoring word."""
+
+        with app.test_client() as client:
+            # write a test for this route
+            response = client.post('/api/new-game')
+            json = response.get_json()
+
+            game_id = json.get("game_id")
+            games[game_id].board[0][0] = "C"
+            games[game_id].board[0][1] = "A"
+            games[game_id].board[0][2] = "T"
+
+            data = {"game_id": game_id, "word": "CAT"}
+            response = client.post('/api/score-word', json=data)
+            json = response.get_json()
+
+            self.assertEqual(json.get("result"), "ok")
+
