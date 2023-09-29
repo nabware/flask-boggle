@@ -37,20 +37,49 @@ function displayBoard(board) {
   }
 }
 
-async function checkWord(evt) {
-  evt.preventDefault(); // prevent page refresh
+/**
+ * Gets user inputted word, scores the word, and displays
+ * the word or error message
+ */
 
+async function handleWordSubmit(evt) {
+  evt.preventDefault(); // prevent page refresh
+  const word = $wordInput.val();
+  $wordInput.val("");
+
+  const { result } = await scoreWord(gameId, word)
+  displayScoredWord(result, word)
+}
+
+/**
+ * Takes gameID and word, communicates with API to validate word
+ * returns response of Ok if word is valid or appropriate error if not
+ */
+async function scoreWord(gameId, word){
   const response = await fetch("/api/score-word", {
     method: "POST",
-    body: JSON.stringify({ game_id: gameId, word: $wordInput.val().toUpperCase() }),
+    body: JSON.stringify({ game_id: gameId, word: word.toUpperCase() }),
     headers: { "Content-Type": "application/json" }
   });
 
-  const _data = await response.json();
-
-  $wordInput.val("");
+  return await response.json();
 }
 
-$form.on("submit", checkWord);
+/** Takes result of API call and word,
+ * displays result in DOM
+ */
+function displayScoredWord(result, word){
+
+  if (result === "ok") {
+    $("<li>").text(word).appendTo($playedWords);
+  } else if (result === "not-word") {
+    $message.text(`${word} is not a valid word!`);
+  } else {
+    $message.text(`${word} is not on the board!`);
+  }
+
+}
+
+$form.on("submit", handleWordSubmit);
 
 start();
