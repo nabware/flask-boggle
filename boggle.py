@@ -84,6 +84,7 @@ class BoggleGame():
 
         return board
 
+
     def play_and_score_word(self, word):
         """Score a Boggle word and add to played words. Returns game score."""
 

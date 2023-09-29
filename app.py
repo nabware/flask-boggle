@@ -31,15 +31,13 @@ def new_game():
 
 @app.post("/api/score-word")
 def score_word():
+    #TODO: make dosctring more legible for front end devs, outline datastructures
     """Takes game_id and a word, checks if word is legal, returns a json object
         with the result
     """
 
     game_id = request.json.get("game_id")
     word = request.json.get("word")
-
-    if not (game_id in games):
-        return jsonify(result="Game not found")
 
     game = games[game_id]
 
@@ -52,8 +50,3 @@ def score_word():
     _score = game.play_and_score_word(word)
 
     return jsonify(result="ok")
-
-
-
-
-

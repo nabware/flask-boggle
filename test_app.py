@@ -34,29 +34,47 @@ class BoggleAppTestCase(TestCase):
         with app.test_client() as client:
             # write a test for this route
             response = client.post('/api/new-game')
-            json = response.get_json()
+            data = response.get_json()
+            game_id = data['game_id']
 
-            self.assertIsInstance(json, dict)
-            self.assertIsInstance(json['game_id'], str)
-            self.assertIsInstance(json['board'], list)
-            self.assertIn(json['game_id'], games)
+            self.assertIsInstance(game_id, str)
+            self.assertIsInstance(data['board'], list)
+            self.assertIn(game_id, games)
 
     def test_api_score_word(self):
-        """Test scoring word."""
+        """Test scoring word. The only valid word in the test board is CAT,
+            rest of board is filled with "X"
+        """
 
         with app.test_client() as client:
             # write a test for this route
             response = client.post('/api/new-game')
-            json = response.get_json()
+            data = response.get_json()
 
-            game_id = json.get("game_id")
-            games[game_id].board[0][0] = "C"
-            games[game_id].board[0][1] = "A"
-            games[game_id].board[0][2] = "T"
+            game_id = data.get("game_id")
+            game = games[game_id]
 
-            data = {"game_id": game_id, "word": "CAT"}
-            response = client.post('/api/score-word', json=data)
-            json = response.get_json()
+            board = []
+            for y in range(game.board_size):
+                board.append(["X" for x in range(game.board_size)])
 
-            self.assertEqual(json.get("result"), "ok")
+            board[0][0] = "C"
+            board[0][1] = "A"
+            board[0][2] = "T"
 
+            game.board = board
+
+            params = {"game_id": game_id, "word": "CAT"}
+            response = client.post('/api/score-word', json=params)
+            data = response.get_json()
+            self.assertEqual({'result': 'ok'}, data)
+
+            params = {"game_id": game_id, "word": "ASDK"}
+            response = client.post('/api/score-word', json=params)
+            data = response.get_json()
+            self.assertEqual({'result': 'not-word'}, data)
+
+            params = {"game_id": game_id, "word": "DOG"}
+            response = client.post('/api/score-word', json=params)
+            data = response.get_json()
+            self.assertEqual({'result': 'not-on-board'}, data)
